@@ -36,13 +36,13 @@
   register: kong_release_info
   ignore_errors: true
 
-- name: Apply all gateway resources from directory
-  shell: kubectl apply -f /root/.kube/ressources/gateway/ 
-  register: kubectl_apply_result
-  changed_when: "'configured' in kubectl_apply_result.stdout or 'created' in kubectl_apply_result.stdout"
-  failed_when: 
-    - kubectl_apply_result.rc != 0
-    - "'no objects passed to apply' not in kubectl_apply_result.stderr"
+#- name: Apply all gateway resources from directory
+#  shell: kubectl apply -f /root/.kube/ressources/gateway/
+#  register: kubectl_apply_result
+#  changed_when: "'configured' in kubectl_apply_result.stdout or 'created' in kubectl_apply_result.stdout"
+#  failed_when:
+#    - kubectl_apply_result.rc != 0
+#    - "'no objects passed to apply' not in kubectl_apply_result.stderr"
 
 - name: Install Kong gateway
   kubernetes.core.helm:

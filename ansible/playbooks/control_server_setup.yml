@@ -7,6 +7,19 @@
     containerd_mount_point: "/var/lib/containerd-storage"
     containerd_original: "/var/lib/containerd"
 
+    # Application deployment variables
+    docker_registry_user: "skuuun"
+    frontend_image_name: "t-nsa-frontend"
+    backend_image_name: "t-nsa-backend"
+
+    # Database configuration
+    database_host: "192.168.2.12"
+    database_port: "5432"
+    database_type: "postgresql"
+    database_name: "myapp_db"
+    database_user: "myapp_user"
+    database_password: "SecurePassword123!"
+
   tasks:
     - name: Install CENTOS utils
       include_tasks: ../tasks/install_CENTOS_utils.yml
@@ -39,3 +52,6 @@
     # Install Gitea
     - name: Install Gitea
       include_tasks: ../tasks/install_gitea.yml
+
+    - name: Deploy applications
+      include_tasks: ../tasks/deploy_applications.yml

@@ -1,0 +1,10 @@
+---
+- name: Pull backend image from Docker Hub
+  shell: |
+      ctr --namespace k8s.io image pull docker.io/{{ docker_registry_user }}/{{ backend_image_name }}:{{ backend_image_tag }}
+  register: backend_pull
+  changed_when: "'Downloaded' in backend_pull.stderr or 'Pulled' in backend_pull.stderr"
+
+- name: Display backend image pull status
+  debug:
+      msg: "Backend image pulled: {{ docker_registry_user }}/{{ backend_image_name }}:{{ backend_image_tag }}"

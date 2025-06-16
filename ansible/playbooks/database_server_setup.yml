@@ -12,6 +12,9 @@
     gitea_db_name: "gitea"
     gitea_db_user: "gitea"
     gitea_db_password: "gitea_secure_password_2024"
+    app_db_name: "myapp_db"
+    app_db_user: "myapp_user"
+    app_db_password: "SecurePassword123!"
 
   tasks:
     - name: Install CENTOS utils
@@ -22,3 +25,6 @@
 
     - name: Configure PostgreSQL for Gitea (simplified)
       include_tasks: ../tasks/configure_psql_gitea.yml
+
+    - name: Configure PostgreSQL for application
+      include_tasks: ../tasks/configure_psql_app.yml

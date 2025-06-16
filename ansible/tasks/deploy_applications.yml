@@ -1,0 +1,116 @@
+---
+- name: Create applications namespace
+  shell: |
+      kubectl create namespace applications --dry-run=client -o yaml | kubectl apply -f -
+  environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: Create application deployment manifest
+  copy:
+      dest: /tmp/applications.yaml
+      content: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: backend
+            namespace: applications
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: backend
+            template:
+              metadata:
+                labels:
+                  app: backend
+              spec:
+                nodeSelector:
+                  kubernetes.io/hostname: backendserver
+                containers:
+                - name: backend
+                  image: {{ docker_registry_user }}/{{ backend_image_name }}
+                  imagePullPolicy: Never
+                  ports:
+                  - containerPort: 3000
+                  env:
+                  - name: DB_HOST
+                    value: "{{ database_host }}"
+                  - name: DB_PORT
+                    value: "{{ database_port }}"
+                  - name: DB_USER
+                    value: "{{ database_user }}"
+                  - name: DB_PASSWORD
+                    value: "{{ database_password }}"
+                  - name: DB_NAME
+                    value: "{{ database_name }}"
+                  - name: DB_TYPE
+                    value: "{{ database_type }}"
+                  - name: NODE_ENV
+                    value: "production"
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: backend-service
+            namespace: applications
+          spec:
+            type: NodePort
+            ports:
+            - port: 3000
+              nodePort: 30300
+            selector:
+              app: backend
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: frontend
+            namespace: applications
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: frontend
+            template:
+              metadata:
+                labels:
+                  app: frontend
+              spec:
+                nodeSelector:
+                  kubernetes.io/hostname: frontendserver
+                containers:
+                - name: frontend
+                  image: {{ docker_registry_user }}/{{ frontend_image_name }}
+                  imagePullPolicy: Never
+                  ports:
+                  - containerPort: 80
+                  env:
+                  - name: REACT_APP_API_URL
+                    value: "http://192.168.10.13:30300"
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: frontend-service
+            namespace: applications
+          spec:
+            type: NodePort
+            ports:
+            - port: 80
+              nodePort: 30080
+            selector:
+              app: frontend
+      mode: '0644'
+
+- name: Apply application manifests
+  shell: |
+      kubectl apply -f /tmp/applications.yaml
+  environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: Display deployment status
+  debug:
+      msg: |
+          Applications deployed!
+          Frontend: http://192.168.10.11:30080
+          Backend: http://192.168.10.13:30300

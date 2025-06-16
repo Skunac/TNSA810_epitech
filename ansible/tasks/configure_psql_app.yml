@@ -1,0 +1,30 @@
+---
+- name: Create application database
+  shell: |
+    sudo -u postgres createdb {{ app_db_name }} --encoding=UTF8 --locale=C --template=template0
+  register: app_db_create
+  changed_when: true
+  ignore_errors: yes
+
+- name: Create application database user
+  shell: |
+    sudo -u postgres psql -c "
+    CREATE USER {{ app_db_user }} WITH PASSWORD '{{ app_db_password }}';
+    GRANT ALL PRIVILEGES ON DATABASE {{ app_db_name }} TO {{ app_db_user }};
+    ALTER USER {{ app_db_user }} CREATEDB;
+    "
+  register: app_user_create
+  changed_when: true
+  ignore_errors: yes
+
+- name: Grant additional privileges to application user
+  shell: |
+    sudo -u postgres psql {{ app_db_name }} -c "
+    GRANT ALL ON SCHEMA public TO {{ app_db_user }};
+    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO {{ app_db_user }};
+    GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO {{ app_db_user }};
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {{ app_db_user }};
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO {{ app_db_user }};
+    "
+  register: app_privileges
+  changed_when: true
