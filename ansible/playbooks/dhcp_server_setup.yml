@@ -24,6 +24,9 @@
       
     - name : Remove the default route
       include_tasks: ../tasks/setup_default_gateway.yml
+
+    - name: Setup BGP daemon
+      include_tasks: ../tasks/setup_bgp.yml
       
 
 

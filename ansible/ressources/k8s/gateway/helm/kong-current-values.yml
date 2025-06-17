@@ -931,7 +931,8 @@ gateway:
         postgresql: "5432"
   priorityClassName: ""
   proxy:
-    annotations: {}
+    annotations: 
+      metallb.io/loadBalancerIPs: 192.168.10.20
     enabled: true
     http:
       containerPort: 8000
@@ -949,13 +950,13 @@ gateway:
       pathType: ImplementationSpecific
     labels:
       enable-metrics: "true"
-    loadBalancerClass: ""
+    loadBalancerClass: "kong-lb"
     loadBalancerSourceRanges: []
     nameOverride: ""
     stream:
        - containerPort: 8899 # configure the service to forward traffic to the TLS port
          servicePort: 8899
-         nodePort: 31000
+        #  nodePort: 31000 inutile avec metallb
     tls:
       appProtocol: ""
       containerPort: 8443
@@ -963,7 +964,7 @@ gateway:
       parameters:
       - http2
       servicePort: 443
-      nodePort: 30305
+      # nodePort: 30305 inutile avec metallb
     type: LoadBalancer
   readinessProbe:
     failureThreshold: 3

@@ -1,0 +1,69 @@
+# Enhanced Gitea installation task updated for PostgreSQL
+
+- name: Create MetalLB system namespace with labels
+  kubernetes.core.k8s:
+    state: present
+    resource_definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: metallb-system
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+
+- name: Add MetalLB Helm repository
+  kubernetes.core.helm_repository:
+    name: metallb
+    repo_url: https://metallb.github.io/metallb
+
+- name: Update Helm repositories
+  shell: helm repo update
+  changed_when: false
+
+- name: Copy MetalLB value files
+  ansible.builtin.copy:
+    src: "../ressources/k8s/metallb/"
+    dest: "/root/.kube/ressources/metallb/"
+    mode: '0644'
+    backup: yes
+
+- name: Check if MetalLB is already installed
+  shell: helm list -n metallb-system --output json
+  register: metallb_installed
+  changed_when: false
+  failed_when: false
+
+- name: Restart kube-proxy pods
+  shell: kubectl delete pods -n kube-system -l k8s-app=kube-proxy
+  when: "'metallb' not in metallb_installed.stdout"
+
+- name: Enable strict ARP and switch kube-proxy to ipvs mode
+  shell: |
+    kubectl get configmap kube-proxy -n kube-system -o yaml | \
+    sed -e 's/strictARP: false/strictARP: true/' \
+        -e 's/mode: ""/mode: "ipvs"/' | \
+    kubectl apply -f -
+  when: "'metallb' not in metallb_installed.stdout"
+
+
+- name: Install MetalLB using Helm
+  kubernetes.core.helm:
+    name: metallb
+    chart_ref: metallb/metallb
+    namespace: metallb-system
+    create_namespace: true
+    values_files:
+      - /root/.kube/ressources/metallb/helm/metallb-default-values.yml
+    timeout: 600s
+  when: "'metallb' not in metallb_installed.stdout"
+  register: metallb_installed
+
+- name: Apply all metallb_installed resources from directory
+  shell: kubectl apply -f /root/.kube/ressources/metallb/ 
+  register: kubectl_apply_result
+  changed_when: "'configured' in kubectl_apply_result.stdout or 'created' in kubectl_apply_result.stdout"
+  failed_when:  
+    - kubectl_apply_result.rc != 0
+    - "'no objects passed to apply' not in kubectl_apply_result.stderr"

@@ -36,6 +36,9 @@
     - name: Install helm
       include_tasks: ../tasks/install_helm.yml
 
+    - name: Install MetalLB
+      include_tasks: ../tasks/install_metallb.yml
+
     - name: Configure certmanager
       include_tasks: ../tasks/install_cert_manager.yml
 
