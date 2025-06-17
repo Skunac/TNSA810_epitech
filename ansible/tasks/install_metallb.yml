@@ -35,10 +35,6 @@
   changed_when: false
   failed_when: false
 
-- name: Restart kube-proxy pods
-  shell: kubectl delete pods -n kube-system -l k8s-app=kube-proxy
-  when: "'metallb' not in metallb_installed.stdout"
-
 - name: Enable strict ARP and switch kube-proxy to ipvs mode
   shell: |
     kubectl get configmap kube-proxy -n kube-system -o yaml | \
@@ -47,6 +43,9 @@
     kubectl apply -f -
   when: "'metallb' not in metallb_installed.stdout"
 
+- name: Restart kube-proxy pods
+  shell: kubectl delete pods -n kube-system -l k8s-app=kube-proxy
+  when: "'metallb' not in metallb_installed.stdout"
 
 - name: Install MetalLB using Helm
   kubernetes.core.helm:
