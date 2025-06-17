@@ -60,6 +60,10 @@
   when: "'metallb' not in metallb_installed.stdout"
   register: metallb_installed
 
+- name: Wait for 20 seconds for MetalLB to be ready
+  ansible.builtin.pause:
+    seconds: 20
+
 - name: Apply all metallb_installed resources from directory
   shell: kubectl apply -f /root/.kube/ressources/metallb/ 
   register: kubectl_apply_result
