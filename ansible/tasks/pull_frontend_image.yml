@@ -1,0 +1,10 @@
+---
+- name: Pull frontend image from Docker Hub
+  shell: |
+      ctr --namespace k8s.io image pull docker.io/{{ docker_registry_user }}/{{ frontend_image_name }}:{{ frontend_image_tag }}
+  register: frontend_pull
+  changed_when: "'Downloaded' in frontend_pull.stderr or 'Pulled' in frontend_pull.stderr"
+
+- name: Display frontend image pull status
+  debug:
+      msg: "Frontend image pulled: {{ docker_registry_user }}/{{ frontend_image_name }}:{{ frontend_image_tag }}"

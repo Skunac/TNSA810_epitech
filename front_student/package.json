@@ -1,5 +1,6 @@
 {
   "name": "react-template",
+  "proxy": "http://192.168.10.13:3000",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

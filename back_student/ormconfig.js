@@ -1,10 +1,10 @@
-module.exports ={
-   type: "mysql",
-   host: process.env.DB_HOST,
-   port: 3306,
-   username: "root",
-   password: "root",
-   database: "dev_db",
+module.exports = {
+   type: "postgres",
+   host: "192.168.2.12",
+   port: 5432,
+   username: "gitea",
+   password: "gitea_secure_password_2024",
+   database: "myapp_db",
    synchronize: true,
    logging: false,
    migrationsRun: true,

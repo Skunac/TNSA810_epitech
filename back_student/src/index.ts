@@ -31,7 +31,13 @@ createConnection()
 
     // Call midlewares
     const app = express();
-    app.use(cors());
+      app.use(cors({
+          origin: [
+              'http://192.168.10.11:8080', // Frontend server
+              'http://localhost:3000',     // Local development
+          ],
+          credentials: true
+      }));
     app.use(swaggerStats.getMiddleware({}));
     app.use(helmet());
     app.use(bodyParser.json());
