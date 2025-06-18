@@ -27,6 +27,12 @@
 
     - name: Setup BGP daemon
       include_tasks: ../tasks/setup_bgp.yml
+
+    - name: Configure PF exporter
+      include_tasks: ../tasks/configure_pf_exporter.yml
+
+    - name: Install prometheus
+      include_tasks: ../tasks/install_prometheus.yml
       
 
 

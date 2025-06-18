@@ -1,0 +1,27 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-grafana
+  namespace: monitoring
+spec:
+  parentRefs:
+  - name: kong
+    kind: Gateway
+    namespace: default
+    sectionName: global-https
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /grafana
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    backendRefs:
+    - name: my-grafana
+      kind: Service
+      port: 80
+      namespace: monitoring

@@ -48,6 +48,9 @@
     - name: Configure dashboard
       include_tasks: ../tasks/configure_k8s_dashboard.yml
 
+    - name: Install Grafana
+      include_tasks: ../tasks/install_grafana.yml
+
     # Install Gitea
     - name: Install Gitea
       include_tasks: ../tasks/install_gitea.yml

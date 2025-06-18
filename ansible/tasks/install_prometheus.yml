@@ -1,0 +1,37 @@
+- name: Install Prometheus and node_exporter packages
+  openbsd_pkg:
+    name:
+      - prometheus
+      - node_exporter
+    state: present
+
+- name: Ensure Prometheus config directory exists
+  file:
+    path: /etc/prometheus
+    state: directory
+    mode: '0755'
+
+- name: Copy Prometheus configuration files
+  ansible.builtin.copy:
+    src: "../ressources/prometheus/"
+    dest: "/etc/prometheus/"
+    mode: '0644'
+    backup: yes
+
+- name: Enable prometheus service
+  command: rcctl enable prometheus
+  changed_when: false
+
+- name: Enable node_exporter service
+  command: rcctl enable node_exporter
+  changed_when: false
+
+- name: Start prometheus service
+  command: rcctl start prometheus
+  register: start_prometheus
+  failed_when: start_prometheus.rc != 0 and 'already running' not in start_prometheus.stderr
+
+- name: Start node_exporter service
+  command: rcctl start node_exporter
+  register: start_node_exporter
+  failed_when: start_node_exporter.rc != 0 and 'already running' not in start_node_exporter.stderr
